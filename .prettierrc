@@ -1,5 +1,7 @@
 {
   "editorconfig": true,
+  "printWidth": 90,
+  "proseWrap": "preserve",
   "singleQuote": true,
   "useTabs": false
 }
