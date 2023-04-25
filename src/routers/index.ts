@@ -1,1 +1,3 @@
-export * from './movies.routes';
+import movieRouter from './movies.routes';
+
+export { movieRouter };

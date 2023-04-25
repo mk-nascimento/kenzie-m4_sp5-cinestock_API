@@ -5,10 +5,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 
 const dataSourceConfig = (): DataSourceOptions => {
   const entitiesPath: string = path.join(__dirname, './entities/**.{js,ts}');
-  const migrationsPath: string = path.join(
-    __dirname,
-    './migrations/**.{js,ts}'
-  );
+  const migrationsPath: string = path.join(__dirname, './migrations/**.{js,ts}');
 
   const DATABASE_URL: string | undefined = process.env.DATABASE_URL;
   const NODE_ENV: string | undefined = process.env.NODE_ENV;
@@ -34,6 +31,4 @@ const dataSourceConfig = (): DataSourceOptions => {
   };
 };
 
-const AppDataSource = new DataSource(dataSourceConfig());
-
-export default AppDataSource;
+export const AppDataSource = new DataSource(dataSourceConfig());

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { ZodError } from 'zod';
 
-class AppError extends Error {
+export class AppError extends Error {
   statusCode: number;
 
   constructor(message: string, statuscode: number = 400) {
@@ -11,7 +11,7 @@ class AppError extends Error {
   }
 }
 
-const handleError = (
+export const handleError = (
   err: Error,
   req: Request,
   res: Response,
