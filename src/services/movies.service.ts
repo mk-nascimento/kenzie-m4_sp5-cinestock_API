@@ -1,8 +1,17 @@
-import { Repository } from 'typeorm';
+import 'dotenv/config';
+import { FindManyOptions, Repository } from 'typeorm';
 import { AppDataSource } from '../data-source';
 import { Movie } from '../entities';
-import { TMovie, TMovieRequest, TMoviesList } from '../interfaces';
+import {
+  TMovie,
+  TMovieRequest,
+  TMoviesList,
+  TMoviesListPagination,
+  TOrder,
+  TSort,
+} from '../interfaces';
 import * as schemas from '../schemas';
+import { Url } from './index';
 
 export const createMovieService = async (movieData: TMovieRequest): Promise<TMovie> => {
   const moviesRepo: Repository<Movie> = AppDataSource.getRepository(Movie);
@@ -16,20 +25,46 @@ export const createMovieService = async (movieData: TMovieRequest): Promise<TMov
 };
 
 export const readMoviesService = async (
-  pageParams: number = 0,
-  perPageParams: number = 0,
-  orderParams: 'asc' | 'desc' = 'asc',
-  sortParams: 'price' | 'duration' | undefined = undefined
-): Promise<TMoviesList> => {
+  page: number = 1,
+  perPage: number = 0,
+  order: TOrder,
+  sort: TSort = undefined
+): Promise<TMoviesListPagination> => {
+  const validatePerPage: boolean = +perPage > 0 && +perPage < 5 && !isNaN(+perPage);
+  const validatePage: boolean = page > 0 && !isNaN(+perPage);
+  if (!validatePerPage) perPage = 5;
+  if (!validatePage) page = 1;
+
   const moviesRepo: Repository<Movie> = AppDataSource.getRepository(Movie);
 
-  const dbMovies: Array<Movie> = await moviesRepo.find({
-    order: sortParams ? { duration: orderParams } : { id: orderParams },
-    skip: 0,
-    take: perPageParams,
-  });
+  const moviesCount: number = await moviesRepo.count();
+  const pagesCount: number = Math.ceil(moviesCount / perPage);
 
-  const movies = schemas.moviesList.parse(dbMovies);
+  const moviesOptions: FindManyOptions<Movie> = { order: {} };
+  switch (sort) {
+    case 'duration':
+      moviesOptions.order = { duration: order ? order : 'asc' };
+      break;
+    case 'price':
+      moviesOptions.order = { price: order ? order : 'asc' };
+      break;
+    default:
+      moviesOptions.order = {};
+  }
 
-  return movies;
+  moviesOptions.skip = (page - 1) * perPage;
+  moviesOptions.take = perPage;
+
+  const dbMovies: Array<Movie> = await moviesRepo.find(moviesOptions);
+  const movies: TMoviesList = schemas.moviesList.parse(dbMovies);
+
+  const prev: boolean = page - 1 > 0 && page <= pagesCount + 1;
+  const next: boolean = +pagesCount > +page || false;
+
+  return {
+    prevPage: prev ? new Url(+page, order, perPage, sort).getUrl('prev') : null,
+    nextPage: next ? new Url(+page, order, perPage, sort).getUrl('next') : null,
+    count: moviesCount,
+    data: movies,
+  };
 };
