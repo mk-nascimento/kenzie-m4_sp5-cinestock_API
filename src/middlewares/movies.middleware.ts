@@ -14,10 +14,10 @@ export const validateName = async (
   const { name: reqName }: Pick<TMovieRequest, 'name'> = req.body;
 
   const moviesRepo: Repository<Movie> = AppDataSource.getRepository(Movie);
-
   const nameExists: boolean = await moviesRepo.exist({ where: { name: reqName } });
 
-  if (nameExists) throw new AppError('Movie already exists.', StatusCodes.CONFLICT);
+  if (reqName && nameExists)
+    throw new AppError('Movie already exists.', StatusCodes.CONFLICT);
 
   return next();
 };
@@ -32,7 +32,6 @@ export const validateId = async (
   const moviesRepo: Repository<Movie> = AppDataSource.getRepository(Movie);
 
   const movieExists: boolean = await moviesRepo.exist({ where: { id: id } });
-
   if (!movieExists) throw new AppError('Movie not found', StatusCodes.NOT_FOUND);
 
   res.locals.movieId = id;

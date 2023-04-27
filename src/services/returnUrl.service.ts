@@ -14,7 +14,7 @@ export class Url {
   }
 
   getUrl(type: 'prev' | 'next'): string {
-    const baseUrl = 'http://localhost:3000/movies';
+    const baseUrl: string = 'http://localhost:3000/movies';
 
     switch (type) {
       case 'prev':

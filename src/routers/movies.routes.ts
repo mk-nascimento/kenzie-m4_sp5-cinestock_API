@@ -11,7 +11,14 @@ movieRouter.post(
   mw.validateName,
   ctrl.createMovieController
 );
-
 movieRouter.get('', ctrl.readMoviesController);
+movieRouter.patch(
+  '/:id',
+  mw.validateId,
+  mw.validateName,
+  mw.validateBody(schemas.movieUpdate),
+  ctrl.updateMovieController
+);
+movieRouter.delete('/:id', mw.validateId, ctrl.deleteMovieController);
 
 export default movieRouter;
